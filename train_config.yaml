@@ -1,0 +1,47 @@
+﻿# Run with:
+#   conda run -n lichun swift sft train_config.yaml
+
+model: pretrained_model/gemma-3-270m
+template: gemma3_text
+output_dir: output/gemma-3-270m/logo_svg_lora
+
+dataset:
+  - data/train.jsonl
+val_dataset:
+  - data/valid.jsonl
+split_dataset_ratio: 0.0
+load_from_cache_file: true
+
+tuner_type: lora
+target_modules: all-linear
+lora_rank: 8
+lora_alpha: 32
+lora_dropout: 0.05
+
+torch_dtype: bfloat16
+num_train_epochs: 5      # 首轮加强训练到 5 个 epoch，观察能否从 prompt echo 转向 SVG 生成
+learning_rate: 1e-3      # V1 实验提高学习率后，模型开始产生少量有效 SVG
+lr_scheduler_type: cosine
+warmup_ratio: 0.01       # 前 1% step 做 warmup，减少训练初期震荡
+max_grad_norm: 1.0       # 梯度裁剪，防止小数据训练时偶发梯度尖峰
+
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 2
+gradient_accumulation_steps: 16   # 等效 batch size = 1 * 16 = 16
+gradient_checkpointing: true     # 节省显存，270M 模型也可以保持开启
+
+eval_strategy: steps
+eval_steps: 1                   # 小数据集训练步数少，频繁看验证 loss
+save_strategy: steps
+save_steps: 1
+save_total_limit: 100
+metric_for_best_model: eval_loss # 选择验证 loss 最低的 checkpoint
+greater_is_better: false
+load_best_model_at_end: true
+
+logging_steps: 1
+max_length: 3072                 # 覆盖大多数 prompt+SVG 样本，减少长 SVG 被截断
+dataloader_num_workers: 0        # Windows 下多进程 dataloader 容易出兼容问题
+dataset_num_proc: 1              # 数据很小，单进程预处理更容易复现
+
+
