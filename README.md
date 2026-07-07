@@ -29,7 +29,6 @@
 
 - `pretrained_model/`：本地基座模型目录，体积较大，不上传。
 - `output/`：训练过程 checkpoint 和日志目录，体积较大，不上传；关键日志已整理进 `report.md`。
-- `data/`：训练和验证 JSONL 数据。如果老师要求数据一起提交，可单独加入 Git。
 
 ## 文件说明
 
@@ -47,7 +46,7 @@
 
 ## 环境准备
 
-本实验在 `lichun` conda 环境中完成，主要依赖包括：
+本实验在windows、RTX5090、 `lichun` conda 环境中完成，主要依赖包括：
 
 - `ms-swift`
 - `torch`
